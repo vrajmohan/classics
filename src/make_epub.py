@@ -1,4 +1,20 @@
 #! /usr/bin/env python3
+
+#    Copyright (C) 2012 Vraj Mohan
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import argparse
 import re
 import sys
@@ -58,12 +74,7 @@ def make_pretty(paragraphs):
     return pretty_paragraphs
 
 def split_into_chunks(paragraphs):
-    #chapter_pat = re.compile('[IVXLC]+\.|Book the')
-    chapter_pat = re.compile('CHAPTER [A-Z]+|BOOK [A-Z]+')
-    #chapter_pat = re.compile('THE STORY [ A-Z]*|THE NARRATIVE [ A-Z]*')
-    #chapter_pat = re.compile('Chapter [0-9]+|Part [0-9]+')
-    #chapter_pat = re.compile('[0-9]+ .*')
-    #chapter_pat = re.compile('^CHAPTER [0-9]+')
+    chapter_pat = re.compile('chapter [A-Z]+|chapter [0-9]+|book [A-Z]+|book [0-9]+|part [A-Z]+|part [0-9]+|[0-9]+\.', flags = re.IGNORECASE)
     chunks = []
     i = 0
     content = [paragraphs[0]]
