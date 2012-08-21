@@ -74,7 +74,8 @@ def make_pretty(paragraphs):
     return pretty_paragraphs
 
 def split_into_chunks(paragraphs):
-    chapter_pat = re.compile('chapter [A-Z]+|chapter [0-9]+|book [A-Z]+|book [0-9]+|part [A-Z]+|part [0-9]+|[0-9]+\.', flags = re.IGNORECASE)
+    chapter_pat = re.compile('chapter [A-Z]+|chapter [0-9]+|book [A-Z]+|book [0-9]+|part [A-Z]+|part [0-9]+|[0-9]+\.', 
+        flags = re.IGNORECASE)
     chunks = []
     i = 0
     content = [paragraphs[0]]
@@ -95,13 +96,15 @@ def split_into_chunks(paragraphs):
 
 arg_parser = argparse.ArgumentParser(description="Create epub from Project Gutenberg style text")
 arg_parser.add_argument("source", help = "the source text file to parse")
-arg_parser.add_argument("title", help = "the epub title to create")
 arg_parser.add_argument("output", help = "the directory in which the exploded epub will be created")
+arg_parser.add_argument("-t", "--title", help = "the epub title to create")
+arg_parser.add_argument("-a", "--author", help = "the author of the title")
+arg_parser.add_argument("-i", "--id", help = "the epub id of the title")
 args = arg_parser.parse_args()
 
 source_file=args.source
-title=args.title
 output_dir=args.output
+title=args.title
 
 raw_paragraphs = extract_paragraphs(source_file)
 pretty_paragraphs = make_pretty(raw_paragraphs)
