@@ -94,20 +94,23 @@ def split_into_chunks(paragraphs):
     chunks.append(chunk)
     return chunks
 
+
 arg_parser = argparse.ArgumentParser(description="Create epub from Project Gutenberg style text")
 arg_parser.add_argument("source", help = "the source text file to parse")
-arg_parser.add_argument("output", help = "the directory in which the exploded epub will be created")
+arg_parser.add_argument("epub", help = "the name of the epub file to create")
 arg_parser.add_argument("-t", "--title", help = "the epub title to create")
 arg_parser.add_argument("-a", "--author", help = "the author of the title")
-arg_parser.add_argument("-i", "--id", help = "the epub id of the title")
+arg_parser.add_argument("-i", "--epub_id", help = "the epub id of the title")
 args = arg_parser.parse_args()
 
 source_file=args.source
-output_dir=args.output
-title=args.title
+epub_name=args.epub
+title=args.title or 'My Title'
+author=args.author or 'Unknown'
+epub_id=args.epub_id or 'Epub ID'
 
 raw_paragraphs = extract_paragraphs(source_file)
 pretty_paragraphs = make_pretty(raw_paragraphs)
 chunks = split_into_chunks(pretty_paragraphs)
-epub_writer.write_output(output_dir, title, chunks)
+epub_writer.write_output(chunks, epub_name, title, author, epub_id)
 

@@ -16,10 +16,11 @@
 import os
 import shutil
 import string
+import tempfile
+import zipfile
 
 def prepare_output(output_dir):
     'Creates the directory structure and copies stock files'
-    os.makedirs(output_dir, exist_ok=True)
     os.makedirs(output_dir + "/META-INF", exist_ok=True)
     os.makedirs(output_dir + "/OEBPS", exist_ok=True)
     shutil.copy("ref/mimetype", output_dir)
@@ -35,7 +36,7 @@ def write_header(title, f):
     f.write("</head>\n")
     f.write("<body>\n")
 
-def write_html(output_dir, title, chunks):
+def write_html(chunks, output_dir, title):
     for chunk in chunks:
         with open(output_dir + "/OEBPS/" + chunk.file_name(), "w") as f:
             write_header(title, f)
@@ -49,7 +50,7 @@ def write_html(output_dir, title, chunks):
                 f.write("\n")
             f.write("</body>\n</html>")
 
-def write_content_opf(output_dir, title, chunks):
+def write_content_opf(chunks, output_dir, title, author, epub_id):
     manifest_contents = ""
     spine_contents = ""
     for chunk in chunks:
@@ -59,13 +60,14 @@ def write_content_opf(output_dir, title, chunks):
     with open("ref/content.opf") as f:
         content_opf_txt =  f.read()
         content_opf_template = string.Template(content_opf_txt)
-        output = content_opf_template.safe_substitute(title=title, manifest_contents = manifest_contents, spine_contents = spine_contents)
+        output = content_opf_template.safe_substitute(title = title, author = author, epub_id = epub_id, 
+            manifest_contents = manifest_contents, spine_contents = spine_contents)
         with open(output_dir + "/OEBPS/content.opf", "w") as f:
             f.write(output)
 
 
 
-def write_toc_ncx(output_dir, title, chunks):
+def write_toc_ncx(chunks, output_dir, title):
     navPoints = ""
     for i, chunk in enumerate(chunks):
         navPoints += '\t\t<navPoint id="' + chunk.name() + '" playOrder="' + str(i) + '">\n' + '<navLabel> <text>' + chunk.title + '</text>\n' + '</navLabel>\n' + '<content src="' + chunk.file_name() + '"/>\n' + '</navPoint>\n'
@@ -77,8 +79,19 @@ def write_toc_ncx(output_dir, title, chunks):
         with open(output_dir + "/OEBPS/toc.ncx", "w") as f:
             f.write(output)
 
-def write_output(output_dir, title, chunks):
-    prepare_output(output_dir)
-    write_html(output_dir, title, chunks)
-    write_content_opf(output_dir, title, chunks)
-    write_toc_ncx(output_dir, title, chunks)
+def create_epub(output_dir, epub_name): 
+    with zipfile.ZipFile(epub_name, 'w') as zip_file:
+        os.chdir(output_dir)
+        zip_file.write('mimetype', compress_type=zipfile.ZIP_STORED)
+        zip_file.write('META-INF/container.xml', compress_type=zipfile.ZIP_DEFLATED)
+        for root, dirs, files in os.walk('OEBPS'):
+            for file_name in files:
+                zip_file.write(os.path.join(root, file_name), compress_type=zipfile.ZIP_DEFLATED)
+
+def write_output(chunks, epub_name, title, author, epub_id):
+    with tempfile.TemporaryDirectory() as output_dir:
+        prepare_output(output_dir)
+        write_html(chunks, output_dir, title)
+        write_content_opf(chunks, output_dir, title, author, epub_id)
+        write_toc_ncx(chunks, output_dir, title)
+        create_epub(output_dir, epub_name)
