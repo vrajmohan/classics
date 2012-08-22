@@ -25,6 +25,8 @@ def prepare_output(output_dir):
     os.makedirs(output_dir + "/OEBPS", exist_ok=True)
     shutil.copy("ref/mimetype", output_dir)
     shutil.copy("ref/META-INF/container.xml", output_dir + "/META-INF")
+    shutil.copy("ref/OEBPS/style.css", output_dir + "/OEBPS")
+    shutil.copy("ref/OEBPS/cc.png", output_dir + "/OEBPS")
 
 def write_header(title, f):
     f.write("<?xml version='1.0' encoding='UTF-8'?>\n")
@@ -33,6 +35,7 @@ def write_header(title, f):
     f.write("<head>\n")
     f.write("<title>" + title + "</title>\n")
     f.write("<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>\n")
+    f.write("<link type='text/css' rel='stylesheet' href='style.css' />\n")
     f.write("</head>\n")
     f.write("<body>\n")
 
@@ -49,6 +52,21 @@ def write_html(chunks, output_dir, title):
                 f.write("</p>")
                 f.write("\n")
             f.write("</body>\n</html>")
+
+def write_front_matter(output_dir, title, author):
+    with open("ref/title.html") as f:
+        title_txt =  f.read()
+        title_template = string.Template(title_txt)
+        output = title_template.safe_substitute(title = title, author = author)
+        with open(output_dir + "/OEBPS/title.html", "w") as f:
+            f.write(output)
+
+    with open("ref/colophon.html") as f:
+        colophon_txt =  f.read()
+        colophon_template = string.Template(colophon_txt)
+        output = colophon_template.safe_substitute(title = title)
+        with open(output_dir + "/OEBPS/colophon.html", "w") as f:
+            f.write(output)
 
 def write_content_opf(chunks, output_dir, title, author, epub_id):
     manifest_contents = ""
@@ -70,7 +88,8 @@ def write_content_opf(chunks, output_dir, title, author, epub_id):
 def write_toc_ncx(chunks, output_dir, title):
     navPoints = ""
     for i, chunk in enumerate(chunks):
-        navPoints += '\t\t<navPoint id="' + chunk.name() + '" playOrder="' + str(i) + '">\n' + '<navLabel> <text>' + chunk.title + '</text>\n' + '</navLabel>\n' + '<content src="' + chunk.file_name() + '"/>\n' + '</navPoint>\n'
+        play_order= i + 2 # Account for title which is 1
+        navPoints += '\t\t<navPoint id="' + chunk.name() + '" playOrder="' + str(play_order) + '">\n' + '<navLabel> <text>' + chunk.title + '</text>\n' + '</navLabel>\n' + '<content src="' + chunk.file_name() + '"/>\n' + '</navPoint>\n'
  
     with open("ref/toc.ncx") as f:
         toc_ncx_txt =  f.read()
@@ -94,4 +113,5 @@ def write_output(chunks, epub_name, title, author, epub_id):
         write_html(chunks, output_dir, title)
         write_content_opf(chunks, output_dir, title, author, epub_id)
         write_toc_ncx(chunks, output_dir, title)
+        write_front_matter(output_dir, title, author)
         create_epub(output_dir, epub_name)
