@@ -73,9 +73,13 @@ def make_pretty(paragraphs):
         pretty_paragraphs.append(italicized_str)
     return pretty_paragraphs
 
-def split_into_chunks(paragraphs):
-    chapter_pat = re.compile('chapter [A-Z]+|chapter [0-9]+|book [A-Z]+|book [0-9]+|part [A-Z]+|part [0-9]+|[0-9]+\.', 
-        flags = re.IGNORECASE)
+def split_into_chunks(paragraphs, chapter_regex):
+    if chapter_regex:
+        chapter_pat = re.compile(chapter_regex)
+    else:
+        chapter_pat = re.compile('chapter [A-Z]+|chapter [0-9]+|book [A-Z]+|book [0-9]+|part [A-Z]+|part [0-9]+|[0-9]+\.', 
+            flags = re.IGNORECASE)
+
     chunks = []
     i = 0
     content = [paragraphs[0]]
@@ -101,6 +105,7 @@ arg_parser.add_argument("epub", help = "the name of the epub file to create")
 arg_parser.add_argument("-t", "--title", help = "the epub title to create")
 arg_parser.add_argument("-a", "--author", help = "the author of the title")
 arg_parser.add_argument("-i", "--epub_id", help = "the epub id of the title")
+arg_parser.add_argument("-r", "--chapter_regex", help = "the regular expression that identifies the chapters")
 args = arg_parser.parse_args()
 
 source_file=args.source
@@ -111,6 +116,6 @@ epub_id=args.epub_id or 'Epub ID'
 
 raw_paragraphs = extract_paragraphs(source_file)
 pretty_paragraphs = make_pretty(raw_paragraphs)
-chunks = split_into_chunks(pretty_paragraphs)
+chunks = split_into_chunks(pretty_paragraphs, args.chapter_regex)
 epub_writer.write_output(chunks, epub_name, title, author, epub_id)
 
