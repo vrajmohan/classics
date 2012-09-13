@@ -20,4 +20,4 @@ rm $EPUB_NAME
 cd $EPUB_DIR
 zip -0Xq $EPUB_NAME mimetype 
 zip -Xqr9D $EPUB_NAME META-INF/ OEBPS/
-java -jar $ROOT_DIR/epubcheck/epubcheck-3.0b5 $EPUB_NAME
+java -jar $ROOT_DIR/epubcheck/epubcheck-3.0b5.jar $EPUB_NAME
