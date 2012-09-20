@@ -98,7 +98,13 @@ def write_toc_ncx(chunks, output_dir, title):
         with open(output_dir + "/OEBPS/toc.ncx", "w") as f:
             f.write(output)
 
-def create_epub(output_dir, epub_name): 
+def  generate_epub_name(title):
+    epub_name = ''.join(x for x in title if x.isalnum() or x.isspace())
+    epub_name = epub_name.replace(' ', '_')
+    return epub_name + ".epub"
+
+def create_epub(output_dir, title): 
+    epub_name = generate_epub_name(title)
     with zipfile.ZipFile(epub_name, 'w') as zip_file:
         os.chdir(output_dir)
         zip_file.write('mimetype', compress_type=zipfile.ZIP_STORED)
@@ -107,11 +113,11 @@ def create_epub(output_dir, epub_name):
             for file_name in files:
                 zip_file.write(os.path.join(root, file_name), compress_type=zipfile.ZIP_DEFLATED)
 
-def write_output(chunks, epub_name, title, author, epub_id):
+def write_output(chunks, title, author, epub_id):
     with tempfile.TemporaryDirectory() as output_dir:
         prepare_output(output_dir)
         write_html(chunks, output_dir, title)
         write_content_opf(chunks, output_dir, title, author, epub_id)
         write_toc_ncx(chunks, output_dir, title)
         write_front_matter(output_dir, title, author)
-        create_epub(output_dir, epub_name)
+        create_epub(output_dir, title)
