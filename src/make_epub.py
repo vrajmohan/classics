@@ -32,7 +32,7 @@ class Chunk:
     def file_name(self):
         return self.name() + ".html"
 
-def pretty_quote(str):
+def replace_opening_and_closing_double_quotes(str):
     'Replaces alternate " in str with “ and ”'
     in_quotes = False
     quoted_str = ""
@@ -68,7 +68,7 @@ def make_pretty(paragraphs):
     for para in paragraphs:
         joined_str = para.translate(translation_map)
         em_dashed_str = joined_str.replace('--', '—')
-        pretty_quoted_str = pretty_quote(em_dashed_str)
+        pretty_quoted_str = replace_opening_and_closing_double_quotes(em_dashed_str)
         italicized_str = re.sub(r'_(.*?)_', r'<i>\1</i>', pretty_quoted_str)
         pretty_paragraphs.append(italicized_str)
     return pretty_paragraphs
@@ -108,14 +108,17 @@ def parse_args():
     arg_parser.add_argument("-r", "--chapter_regex", help = "the regular expression that identifies the chapters")
     return arg_parser.parse_args()
 
-args = parse_args()
-source_file=args.source
-title=args.title or 'My Title'
-author=args.author or 'Unknown'
-epub_id=args.epub_id or 'Epub ID'
+def main():
+    args = parse_args()
+    source_file=args.source
+    title=args.title or 'My Title'
+    author=args.author or 'Unknown'
+    epub_id=args.epub_id or 'Epub ID'
 
-raw_paragraphs = extract_paragraphs(source_file)
-pretty_paragraphs = make_pretty(raw_paragraphs)
-chunks = split_into_chunks(pretty_paragraphs, args.chapter_regex)
-epub_writer.write_output(chunks, title, author, epub_id)
+    raw_paragraphs = extract_paragraphs(source_file)
+    pretty_paragraphs = make_pretty(raw_paragraphs)
+    chunks = split_into_chunks(pretty_paragraphs, args.chapter_regex)
+    epub_writer.write_output(chunks, title, author, epub_id)
 
+if __name__ == '__main__':
+    main()
