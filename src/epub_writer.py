@@ -27,6 +27,7 @@ def prepare_output(output_dir):
     shutil.copy("ref/META-INF/container.xml", output_dir + "/META-INF")
     shutil.copy("ref/OEBPS/style.css", output_dir + "/OEBPS")
     shutil.copy("ref/OEBPS/cc.png", output_dir + "/OEBPS")
+    shutil.copy("ref/cover.jpg", output_dir + "/OEBPS")
 
 def write_header(title, f):
     f.write("<?xml version='1.0' encoding='UTF-8'?>\n")
@@ -68,6 +69,14 @@ def write_front_matter(output_dir, title, author):
         with open(output_dir + "/OEBPS/colophon.html", "w") as f:
             f.write(output)
 
+def write_cover(output_dir, title):
+    with open("ref/cover.html") as f:
+        cover_txt =  f.read()
+        cover_template = string.Template(cover_txt)
+        output = cover_template.safe_substitute(title = title)
+        with open(output_dir + "/OEBPS/cover.html", "w") as f:
+            f.write(output)
+            
 def write_content_opf(chunks, output_dir, title, author, epub_id):
     manifest_contents = ""
     spine_contents = ""
@@ -120,4 +129,5 @@ def write_output(chunks, title, author, epub_id):
         write_content_opf(chunks, output_dir, title, author, epub_id)
         write_toc_ncx(chunks, output_dir, title)
         write_front_matter(output_dir, title, author)
+        write_cover(output_dir, title)
         create_epub(output_dir, title)
