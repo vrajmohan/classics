@@ -27,7 +27,6 @@ def prepare_output(output_dir):
     shutil.copy("ref/META-INF/container.xml", output_dir + "/META-INF")
     shutil.copy("ref/OEBPS/style.css", output_dir + "/OEBPS")
     shutil.copy("ref/OEBPS/cc.png", output_dir + "/OEBPS")
-    shutil.copy("ref/cover.jpg", output_dir + "/OEBPS")
 
 def write_header(title, f):
     f.write("<?xml version='1.0' encoding='UTF-8'?>\n")
@@ -69,7 +68,7 @@ def write_front_matter(output_dir, title, author):
         with open(output_dir + "/OEBPS/colophon.html", "w") as f:
             f.write(output)
 
-def write_cover(output_dir, title):
+def write_cover_html(output_dir, title):
     with open("ref/cover.html") as f:
         cover_txt =  f.read()
         cover_template = string.Template(cover_txt)
@@ -77,6 +76,13 @@ def write_cover(output_dir, title):
         with open(output_dir + "/OEBPS/cover.html", "w") as f:
             f.write(output)
             
+def generate_cover(output_dir, title, author, use_magick):
+    if use_magick:
+        os.system('convert -fill White -font /usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf -pointsize 72  -gravity Center  -annotate 0 "' + title 
+            + '" -pointsize 48 -gravity South -annotate 0 "' + author + '\n" ref/cover.jpg ' + output_dir + '/OEBPS/cover.jpg')
+    else:
+        shutil.copy("ref/cover.jpg", output_dir + "/OEBPS")
+
 def write_content_opf(chunks, output_dir, title, author, epub_id):
     manifest_contents = ""
     spine_contents = ""
@@ -112,7 +118,7 @@ def  generate_epub_name(title):
     epub_name = epub_name.replace(' ', '_')
     return epub_name + ".epub"
 
-def create_epub(output_dir, title): 
+def package_epub(output_dir, title): 
     epub_name = generate_epub_name(title)
     with zipfile.ZipFile(epub_name, 'w') as zip_file:
         os.chdir(output_dir)
@@ -122,12 +128,13 @@ def create_epub(output_dir, title):
             for file_name in files:
                 zip_file.write(os.path.join(root, file_name), compress_type=zipfile.ZIP_DEFLATED)
 
-def write_output(chunks, title, author, epub_id):
+def write_output(chunks, title, author, epub_id, use_magick):
     with tempfile.TemporaryDirectory() as output_dir:
         prepare_output(output_dir)
         write_html(chunks, output_dir, title)
         write_content_opf(chunks, output_dir, title, author, epub_id)
         write_toc_ncx(chunks, output_dir, title)
         write_front_matter(output_dir, title, author)
-        write_cover(output_dir, title)
-        create_epub(output_dir, title)
+        write_cover_html(output_dir, title)
+        generate_cover(output_dir, title, author, use_magick)
+        package_epub(output_dir, title)

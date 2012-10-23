@@ -102,23 +102,21 @@ def split_into_chunks(paragraphs, chapter_regex):
 def parse_args():
     arg_parser = argparse.ArgumentParser(description="Create epub from Project Gutenberg style text")
     arg_parser.add_argument("source", help = "the source text file to parse")
-    arg_parser.add_argument("-t", "--title", help = "the epub title to create")
-    arg_parser.add_argument("-a", "--author", help = "the author of the title")
-    arg_parser.add_argument("-i", "--epub_id", help = "the epub id of the title")
+    arg_parser.add_argument("-t", "--title", help = "the epub title to create", required=True)
+    arg_parser.add_argument("-a", "--author", help = "the author of the title", required=True)
+    arg_parser.add_argument("-i", "--epub_id", help = "the epub id of the title", required=True)
     arg_parser.add_argument("-r", "--chapter_regex", help = "the regular expression that identifies the chapters")
+    arg_parser.add_argument("-m", "--use_magick", help = "indicates whether imagemagick is to be used to generate the cover", action='store_true')
     return arg_parser.parse_args()
 
 def main():
     args = parse_args()
     source_file=args.source
-    title=args.title or 'My Title'
-    author=args.author or 'Unknown'
-    epub_id=args.epub_id or 'Epub ID'
 
     raw_paragraphs = extract_paragraphs(source_file)
     pretty_paragraphs = make_pretty(raw_paragraphs)
     chunks = split_into_chunks(pretty_paragraphs, args.chapter_regex)
-    epub_writer.write_output(chunks, title, author, epub_id)
+    epub_writer.write_output(chunks, args.title, args.author, args.epub_id, args.use_magick)
 
 if __name__ == '__main__':
     main()
