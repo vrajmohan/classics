@@ -113,7 +113,7 @@ def write_toc_ncx(chunks, output_dir, title):
         with open(output_dir + "/OEBPS/toc.ncx", "w") as f:
             f.write(output)
 
-def  generate_epub_name(title):
+def generate_epub_name(title):
     epub_name = ''.join(x for x in title if x.isalnum() or x.isspace())
     epub_name = epub_name.replace(' ', '_')
     return epub_name + ".epub"
