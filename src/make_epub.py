@@ -16,6 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
+import codecs
 import re
 import sys
 import epub_writer
@@ -50,10 +51,11 @@ def replace_opening_and_closing_double_quotes(str):
 
 def extract_paragraphs(source_file):
     'Returns the contents of source_file as a list of paragraphs assuming that paragraphs are separated by blank lines'
-    with open(source_file) as f:
+    with open(source_file, "rb") as f:
         paragraphs = []
         para = ""
         for line in f:
+            line = codecs.decode(line, 'utf_8_sig')
             if line.isspace():
                 paragraphs.append(para)
                 para = ""
